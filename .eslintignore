@@ -1,0 +1,9 @@
+build
+node_modules
+
+tsconfig.json
+.eslintrc.js
+
+lint-staged.config.js
+
+src/reportWebVitals.ts

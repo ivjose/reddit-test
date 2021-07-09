@@ -1,10 +1,9 @@
 import React from 'react';
+import Button from '@material-ui/core/Button';
 import logo from './logo.svg';
 import './App.css';
 
-function App() {
-  const data = 'sample';
-
+function App(): JSX.Element {
   return (
     <div className="App">
       <header className="App-header">
@@ -20,6 +19,9 @@ function App() {
         >
           Learn React
         </a>
+        <Button variant="contained" color="primary">
+          Hello World
+        </Button>
       </header>
     </div>
   );

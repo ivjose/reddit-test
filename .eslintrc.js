@@ -28,6 +28,8 @@ module.exports = {
     project: './tsconfig.json',
   },
   rules: {
+    'react/react-in-jsx-scope': 'off',
+    "react/prop-types" : "off",
     'linebreak-style': 'off',
     'prettier/prettier': [
       'error',

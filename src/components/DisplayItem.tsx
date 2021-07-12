@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/media-has-caption */
 /* eslint-disable react/no-danger */
 import Card from '@material-ui/core/Card';
 import CardActionArea from '@material-ui/core/CardActionArea';
@@ -27,15 +28,25 @@ const DisplayItem: React.FC<Props> = ({ title, content, thumbnail, video }) => {
     <Card className={classes.root}>
       <CardActionArea>
         {thumbnail && !video && (
-          <CardMedia
-            component="img"
-            alt="Contemplative Reptile"
-            image={thumbnail}
-            title="Contemplative Reptile"
-          />
+          <CardMedia component="img" alt={title} image={thumbnail} />
         )}
 
-        {video && <div dangerouslySetInnerHTML={{ __html: video.html }} />}
+        {video && video.type === 'youtube.com' && (
+          <div dangerouslySetInnerHTML={{ __html: video.oembed.html }} />
+        )}
+
+        {video && video.reddit_video && (
+          <video controls width="250">
+            <source
+              src={video.reddit_video.scrubber_media_url}
+              type="video/mp4"
+            />
+          </video>
+        )}
+
+        {/* {video && video.type === 'youtube.com' && (
+          <div dangerouslySetInnerHTML={{ __html: video.html }} />
+        )} */}
 
         <CardContent>
           <Typography gutterBottom variant="h5" component="h2">

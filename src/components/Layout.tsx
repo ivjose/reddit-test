@@ -1,10 +1,8 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import { Link as RouterLink } from 'react-router-dom';
 import AppBar from '@material-ui/core/AppBar';
-import Link from '@material-ui/core/Link';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
 
 import { makeStyles } from '@material-ui/core/styles';
 
@@ -24,6 +22,7 @@ const useStyles = makeStyles((theme) => ({
   },
   toolbarTitle: {
     flexGrow: 1,
+    textDecoration: 'none',
   },
   link: {
     margin: theme.spacing(1, 1.5),
@@ -68,44 +67,9 @@ const Layout: React.FC = ({ children }) => {
         <Toolbar className={classes.toolbar}>
           <RouterLink to="/" className={classes.toolbarTitle}>
             <Typography variant="h6" color="inherit" noWrap>
-              Company name
+              Reddit App
             </Typography>
           </RouterLink>
-
-          <nav>
-            <Link
-              variant="button"
-              color="textPrimary"
-              href="#"
-              className={classes.link}
-            >
-              Features
-            </Link>
-            <Link
-              variant="button"
-              color="textPrimary"
-              href="#"
-              className={classes.link}
-            >
-              Enterprise
-            </Link>
-            <Link
-              variant="button"
-              color="textPrimary"
-              href="#"
-              className={classes.link}
-            >
-              Support
-            </Link>
-          </nav>
-          <Button
-            href="#"
-            color="primary"
-            variant="outlined"
-            className={classes.link}
-          >
-            Login
-          </Button>
         </Toolbar>
       </AppBar>
 

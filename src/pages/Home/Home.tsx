@@ -148,7 +148,7 @@ const Home: React.FC = () => {
   }, [selectedSort, prevSort]);
 
   if (isLoading) return <h1>...loading</h1>;
-  console.log(debounceText, 'DDD');
+  console.log(data, 'DDData');
 
   return (
     <Layout>
@@ -183,10 +183,7 @@ const Home: React.FC = () => {
                     title={item.title}
                     content={item.selftext}
                     thumbnail={item.thumbnail !== 'self' && item.url}
-                    video={
-                      item.secure_media?.type === 'youtube.com' &&
-                      item.secure_media.oembed
-                    }
+                    video={item.media}
                   />
                 </Link>
               </Grid>

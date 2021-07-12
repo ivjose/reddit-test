@@ -1,4 +1,5 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
+import { Link as RouterLink } from 'react-router-dom';
 import AppBar from '@material-ui/core/AppBar';
 import Link from '@material-ui/core/Link';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -65,14 +66,12 @@ const Layout: React.FC = ({ children }) => {
         className={classes.appBar}
       >
         <Toolbar className={classes.toolbar}>
-          <Typography
-            variant="h6"
-            color="inherit"
-            noWrap
-            className={classes.toolbarTitle}
-          >
-            Company name
-          </Typography>
+          <RouterLink to="/" className={classes.toolbarTitle}>
+            <Typography variant="h6" color="inherit" noWrap>
+              Company name
+            </Typography>
+          </RouterLink>
+
           <nav>
             <Link
               variant="button"

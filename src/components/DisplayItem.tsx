@@ -1,9 +1,8 @@
+/* eslint-disable react/no-danger */
 import Card from '@material-ui/core/Card';
 import CardActionArea from '@material-ui/core/CardActionArea';
-import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
-import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 
 import { makeStyles } from '@material-ui/core/styles';
@@ -17,30 +16,27 @@ const useStyles = makeStyles({
 type Props = {
   title: string;
   content: string;
-  thumbnail?: string | undefined;
-  thumbnailHeight: number | null | undefined;
-  thumbnailWidth: number | null | undefined;
+  thumbnail: string | false | null;
+  video?: any;
 };
 
-const DisplayItem: React.FC<Props> = ({
-  title,
-  content,
-  thumbnail,
-  thumbnailHeight,
-  thumbnailWidth,
-}) => {
+const DisplayItem: React.FC<Props> = ({ title, content, thumbnail, video }) => {
   const classes = useStyles();
 
   return (
     <Card className={classes.root}>
       <CardActionArea>
-        <CardMedia
-          component="img"
-          alt="Contemplative Reptile"
-          height={`${thumbnailHeight}`}
-          image={thumbnail}
-          title="Contemplative Reptile"
-        />
+        {thumbnail && !video && (
+          <CardMedia
+            component="img"
+            alt="Contemplative Reptile"
+            image={thumbnail}
+            title="Contemplative Reptile"
+          />
+        )}
+
+        {video && <div dangerouslySetInnerHTML={{ __html: video.html }} />}
+
         <CardContent>
           <Typography gutterBottom variant="h5" component="h2">
             {title}
@@ -50,14 +46,6 @@ const DisplayItem: React.FC<Props> = ({
           </Typography>
         </CardContent>
       </CardActionArea>
-      <CardActions>
-        <Button size="small" color="primary">
-          Share
-        </Button>
-        <Button size="small" color="primary">
-          Learn More
-        </Button>
-      </CardActions>
     </Card>
   );
 };

@@ -2,7 +2,8 @@ import React from 'react';
 import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
 
 import Home from 'pages/Home';
-import Subreddit from 'pages/Subreddit';
+import Post from 'pages/Post';
+import Comment from 'pages/Comment';
 
 function App(): JSX.Element {
   return (
@@ -11,8 +12,11 @@ function App(): JSX.Element {
         <Route exact path="/">
           <Home />
         </Route>
-        <Route path="/subreddit">
-          <Subreddit />
+        <Route path="/post/:postId">
+          <Post />
+        </Route>
+        <Route path="/comment/:commentId">
+          <Comment />
         </Route>
       </Switch>
     </Router>

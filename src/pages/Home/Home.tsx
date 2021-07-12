@@ -1,30 +1,26 @@
-import { useState } from 'react';
+/* eslint-disable no-self-compare */
+/* eslint-disable no-underscore-dangle */
+import { useState, useEffect } from 'react';
 import { useQuery } from 'react-query';
-import { snoowrapClient } from 'lib/snoowrapClient';
+import { Listing, Submission } from 'snoowrap';
+import { Link } from 'react-router-dom';
+import { useDebounce } from 'use-debounce';
 
 import Container from '@material-ui/core/Container';
+import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import InputBase from '@material-ui/core/InputBase';
-import IconButton from '@material-ui/core/IconButton';
-import SearchIcon from '@material-ui/icons/Search';
 import Chip from '@material-ui/core/Chip';
 import Box from '@material-ui/core/Box';
+import Button from '@material-ui/core/Button';
 
 import { makeStyles } from '@material-ui/core/styles';
 
+import { snoowrapClient } from 'lib/snoowrapClient';
 import Layout from 'components/Layout';
 import DisplayItem from 'components/DisplayItem';
 
-type Data = {
-  link: string;
-  title: string;
-  comments: any;
-  name: string;
-  content: string;
-  thumbnail: string;
-  thumbnailHeight: number | null | undefined;
-  thumbnailWidth: number | null | undefined;
-};
+import { usePrevious } from 'hooks/usePreviouse';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -46,76 +42,126 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: theme.spacing(1),
     textTransform: 'capitalize',
   },
+  loadMorebutton: {
+    maxWidth: 400,
+    margin: '0 auto',
+    padding: '20px 0',
+  },
 }));
 
 async function fetchGroups(
   subreddit: string,
-  sort: string,
-): Promise<Data[] | undefined> {
-  let posts = null;
-
+  sort?: string,
+  total?: number,
+): Promise<Listing<Submission> | null> {
+  const pageLimit = 9;
   if (sort === 'new') {
-    posts = await snoowrapClient.getSubreddit(subreddit).getNew({ limit: 9 });
+    const posts = await snoowrapClient
+      .getSubreddit(subreddit)
+      .getNew({ limit: pageLimit })
+      .then((currentData) => {
+        if (!total) return currentData;
+        return currentData.fetchMore({ amount: total });
+      });
+
+    return posts;
   }
 
-  if (sort === 'hot') {
-    posts = await snoowrapClient.getSubreddit(subreddit).getHot({ limit: 9 });
+  if (sort === 'top') {
+    const posts = await snoowrapClient
+      .getSubreddit(subreddit)
+      .getTop({ limit: pageLimit })
+      .then((currentData) => {
+        if (!total) return currentData;
+        return currentData.fetchMore({ amount: total });
+      });
+
+    return posts;
   }
 
-  const data = sort
-    ? posts?.map((post) => ({
-        link: post.url,
-        title: post.title,
-        content: post.selftext,
-        comments: post.comments,
-        imgUrl: post.url,
-        name: post.name,
-        thumbnail: post.thumbnail,
-        thumbnailHeight: post.thumbnail_height,
-        thumbnailWidth: post.thumbnail_width,
-      }))
-    : [];
-  console.log(posts, 'DDDDDDDDDDDDDdd');
+  if (sort === 'controversial') {
+    const posts = await snoowrapClient
+      .getSubreddit(subreddit)
+      .getControversial({ limit: pageLimit })
+      .then((currentData) => {
+        if (!total) return currentData;
+        return currentData.fetchMore({ amount: total });
+      });
 
-  //   if (sort === 'controversial') {
-  //     throw new Error('Problem fetching data');
-  //   }
-  return data;
+    return posts;
+  }
+
+  if (sort === 'rising') {
+    const posts = await snoowrapClient
+      .getSubreddit(subreddit)
+      .getRising({ limit: pageLimit })
+      .then((currentData) => {
+        if (!total) return currentData;
+        return currentData.fetchMore({ amount: total });
+      });
+
+    return posts;
+  }
+
+  const posts = await snoowrapClient
+    .getSubreddit(subreddit)
+    .getHot({ limit: pageLimit })
+    .then((currentData) => {
+      if (!total) return currentData;
+      return currentData.fetchMore({ amount: total });
+    });
+
+  return posts;
 }
 
-const sortList = ['hot', 'new', 'top', 'controversial'];
+const sortList = ['hot', 'new', 'top', 'controversial', 'rising'];
 
 const Home: React.FC = () => {
-  const [selectedSort, setSelectedSort] = useState('hot');
-  const [page, setPage] = useState(1);
   const classes = useStyles();
-  const { data, isLoading, error } = useQuery(['subreddit', selectedSort], () =>
-    fetchGroups('ProjectDiablo2', selectedSort),
+  const [selectedSort, setSelectedSort] = useState('hot');
+  const prevSort = usePrevious(selectedSort);
+  const [total, setTotal] = useState(0);
+
+  const [text, setText] = useState('');
+  const [debounceText] = useDebounce(text, 1500);
+
+  const { data, isLoading, error } = useQuery(
+    ['subreddit', debounceText, selectedSort, total],
+    () => fetchGroups(debounceText, selectedSort, total),
+    {
+      keepPreviousData: true,
+    },
   );
 
   const handleSelect = (value: string) => {
-    console.log('TEST');
     setSelectedSort(value);
   };
 
-  //   console.log(isLoading, error, data, 'DDDDDDDDDd');
+  const hanldeAddMore = () => {
+    setTotal((prevState) => prevState + 10);
+  };
+
+  useEffect(() => {
+    if (selectedSort !== prevSort) {
+      setTotal(0);
+    }
+  }, [selectedSort, prevSort]);
+
+  if (isLoading) return <h1>...loading</h1>;
+  console.log(debounceText, 'DDD');
 
   return (
     <Layout>
       <Container maxWidth="md" component="main">
-        <Paper component="form" className={classes.root}>
+        <Paper component="div" className={classes.root}>
           <InputBase
             className={classes.input}
-            placeholder="Search Google Maps"
-            inputProps={{ 'aria-label': 'search google maps' }}
+            placeholder="Subreddit name"
+            inputProps={{ 'aria-label': 'Subreddit name' }}
+            onChange={(e) => {
+              setText(e.target.value);
+            }}
           />
-          <IconButton
-            type="submit"
-            className={classes.iconButton}
-            aria-label="search"
-          >
-            <SearchIcon />
-          </IconButton>
         </Paper>
         <Box m={2}>
           {sortList.map((name) => (
@@ -128,29 +174,39 @@ const Home: React.FC = () => {
             />
           ))}
         </Box>
-        <Box>
+        <Grid container justifyContent="center" spacing={3}>
           {data?.map((item) => {
-            console.log(item);
-
             return (
-              <DisplayItem
-                key={item.name}
-                title={item.title}
-                content={item.content}
-                thumbnail={item.thumbnail}
-                thumbnailHeight={item.thumbnailHeight}
-                thumbnailWidth={item.thumbnailWidth}
-              />
+              <Grid key={item.id} item xs={4}>
+                <Link to={`post/${item.id}`}>
+                  <DisplayItem
+                    title={item.title}
+                    content={item.selftext}
+                    thumbnail={item.thumbnail !== 'self' && item.url}
+                    video={
+                      item.secure_media?.type === 'youtube.com' &&
+                      item.secure_media.oembed
+                    }
+                  />
+                </Link>
+              </Grid>
             );
           })}
+        </Grid>
+        <Box className={classes.loadMorebutton}>
+          <Button
+            variant="contained"
+            color="primary"
+            size="large"
+            fullWidth
+            onClick={hanldeAddMore}
+          >
+            Load More
+          </Button>
         </Box>
-        HOME
       </Container>
     </Layout>
   );
 };
 
 export default Home;
-
-// t3_ohmx97
-// t5_2kkfny
